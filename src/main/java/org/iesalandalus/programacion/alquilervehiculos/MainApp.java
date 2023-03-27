@@ -2,18 +2,18 @@ package org.iesalandalus.programacion.alquilervehiculos;
 
 import org.iesalandalus.programacion.alquilervehiculos.controlador.Controlador;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.FactoriaFuenteDatos;
-import org.iesalandalus.programacion.alquilervehiculos.modelo.Modelo;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.ModeloCascada;
 import org.iesalandalus.programacion.alquilervehiculos.vista.FactoriaVista;
-import org.iesalandalus.programacion.alquilervehiculos.vista.Vista;
 
 public class MainApp {
 
 	public static void main(String[] args) {
-		Modelo modelo = new ModeloCascada(FactoriaFuenteDatos.FICHEROS);
-		Vista vista = FactoriaVista.TEXTO.crear();
-		Controlador controlador = new Controlador(modelo, vista);
+		Controlador controlador = new Controlador(new ModeloCascada(FactoriaFuenteDatos.FICHEROS),
+				FactoriaVista.TEXTO.crear());
 		controlador.comenzar();
+		// Comenzar no parará hasta que pulsemos 0 que corresponderá al salir.
+		// Una vez haga eso, se ejecutará terminar.
+		controlador.terminar();
 	}
 
 }
