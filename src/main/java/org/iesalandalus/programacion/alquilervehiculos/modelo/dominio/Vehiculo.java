@@ -2,7 +2,7 @@ package org.iesalandalus.programacion.alquilervehiculos.modelo.dominio;
 
 import java.util.Objects;
 
-public abstract class Vehiculo {
+public abstract class Vehiculo{
 
 	private static final String ER_MARCA = "[A-Z]+[a-z]*([ -]?[A-Z][a-z]+)*";
 	private static final String ER_MATRICULA = "\\d{4}[BCDFGHJKLMNPRSTVWXYZ]{3}";

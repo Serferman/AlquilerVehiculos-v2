@@ -37,7 +37,6 @@ public class Controlador {
 	public void terminar() {
 		System.out.println("");
 		modelo.terminar();
-		vista.terminar();
 		System.out.printf("%nHasta la próxima!!!!");
 	}
 

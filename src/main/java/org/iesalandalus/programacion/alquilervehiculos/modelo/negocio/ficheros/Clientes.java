@@ -1,19 +1,102 @@
 package org.iesalandalus.programacion.alquilervehiculos.modelo.negocio.ficheros;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.OperationNotSupportedException;
+import javax.xml.parsers.DocumentBuilder;
 
 import org.iesalandalus.programacion.alquilervehiculos.modelo.dominio.Cliente;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.negocio.IClientes;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class Clientes implements IClientes {
 
+	private static final File FICHERO_CLIENTES = new File(
+			String.format("%s%s%s", "datos", File.separator, "clientes.xml"));
+	private static final String RAIZ = "clientes";
+	private static final String CLIENTE = "cliente";
+	private static final String NOMBRE = "nombre";
+	private static final String DNI = "dni";
+	private static final String TELEFONO = "telefono";
+
+	private static Clientes instancia;
+
 	private List<Cliente> coleccionClientes;
 
-	public Clientes() {
+	private Clientes() {
 		coleccionClientes = new ArrayList<>();
+	}
+
+	static Clientes getInstancia() { // Patron SingleTon
+		if (instancia == null) {
+			instancia = new Clientes();
+		}
+		return instancia;
+	}
+
+	@Override
+	public void comenzar() {
+		Document documentoXML = UtilidadesXml.leerXmlDeFichero(FICHERO_CLIENTES);
+		if (documentoXML != null) {
+			leerDom(documentoXML);
+			System.out.print("AVISO: El documento XML se ha leido correctamente.");
+		} else {
+			System.out.print("ERROR: El documento XML no se ha leido correctamente.");
+		}
+	}
+
+	private void leerDom(Document documentoXml) {
+		NodeList clientes = documentoXml.getElementsByTagName(CLIENTE);
+		for (int i = 0; i < clientes.getLength(); i++) {
+			Node cliente = clientes.item(i);
+			if (cliente.getNodeType() == Node.ELEMENT_NODE) {
+				try {
+					insertar(getCliente((Element) cliente));
+				} catch (OperationNotSupportedException | NullPointerException | IllegalArgumentException e) {
+					System.out.printf("ERROR: No se ha podido procesar el cliente: %d --> %s%n", i, e.getMessage());
+				}
+			}
+		}
+		System.out.println("Fichero de objetos leído correctamente.");
+	}
+
+	private Cliente getCliente(Element elemento) {
+		String nombre = elemento.getAttribute(NOMBRE);
+		String dni = elemento.getAttribute(DNI);
+		String telefono = elemento.getAttribute(TELEFONO);
+		return new Cliente(nombre, dni, telefono);
+	}
+
+	@Override
+	public void terminar() {
+		UtilidadesXml.escribirXmlAFichero(crearDom(), FICHERO_CLIENTES);
+	}
+
+	private Document crearDom() {
+		DocumentBuilder constructor = UtilidadesXml.crearConstructorDocumentoXml();
+		Document documentoXml = null;
+		if (constructor != null) {
+			documentoXml = constructor.newDocument();
+			documentoXml.appendChild(documentoXml.createElement(RAIZ));
+			for (Cliente cliente : coleccionClientes) {
+				Element elementoCliente = getElemento(documentoXml, cliente);
+				documentoXml.getDocumentElement().appendChild(elementoCliente);
+			}
+		}
+		return documentoXml;
+	}
+
+	private Element getElemento(Document documentoXml, Cliente cliente) {
+		Element elementoCliente = documentoXml.createElement(CLIENTE);
+		elementoCliente.setAttribute(NOMBRE, cliente.getNombre());
+		elementoCliente.setAttribute(DNI, cliente.getDni());
+		elementoCliente.setAttribute(TELEFONO, cliente.getTelefono());
+		return elementoCliente;
 	}
 
 	@Override

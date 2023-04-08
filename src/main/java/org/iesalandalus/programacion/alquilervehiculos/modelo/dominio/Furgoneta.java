@@ -25,7 +25,7 @@ public class Furgoneta extends Vehiculo {
 
 	private void setPma(int pma) {
 		if ((pma <= 100) || (pma > 10000)) {
-			throw new IllegalArgumentException("ERROR: El PMA no es  correcto.");
+			throw new IllegalArgumentException("ERROR: El PMA no es correcto.");
 		}
 		this.pma = pma;
 	}

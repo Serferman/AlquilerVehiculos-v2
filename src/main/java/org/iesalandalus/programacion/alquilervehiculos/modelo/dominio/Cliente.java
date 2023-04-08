@@ -2,7 +2,7 @@ package org.iesalandalus.programacion.alquilervehiculos.modelo.dominio;
 
 import java.util.Objects;
 
-public class Cliente {
+public class Cliente{
 
 	private static final String ER_NOMBRE = "([A-Z][a-z]+)\\s?([A-Z]{1}[a-z]+\\s*)*";
 	private static final String ER_DNI = "\\d{8}[A-Z]";
@@ -12,10 +12,10 @@ public class Cliente {
 	private String dni;
 	private String telefono;
 
-	public Cliente(String nombre, String dni, String teleono) {
+	public Cliente(String nombre, String dni, String telefono) {
 		setNombre(nombre);
 		setDni(dni);
-		setTelefono(teleono);
+		setTelefono(telefono);
 	}
 
 	public Cliente(Cliente cliente) {

@@ -9,19 +9,18 @@ public class FuenteDatosFicheros implements IFuenteDatos {
 
 	@Override
 	public IClientes crearClientes() {
-		return new Clientes();
-
+		return Clientes.getInstancia();
 	}
 
 	@Override
 	public IVehiculos crearVehiculos() {
-		return new Vehiculos();
+		return Vehiculos.getInstancia();
 
 	}
 
 	@Override
 	public IAlquileres crearAlquileres() {
-		return new Alquileres();
+		return Alquileres.getInstancia();
 
 	}
 

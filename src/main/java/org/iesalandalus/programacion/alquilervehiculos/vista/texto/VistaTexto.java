@@ -30,6 +30,7 @@ public class VistaTexto extends Vista {
 	}
 
 	public void terminar() {
+		getControlador().terminar();
 		System.out.println("AVISO: La vista ha terminado");
 	}
 

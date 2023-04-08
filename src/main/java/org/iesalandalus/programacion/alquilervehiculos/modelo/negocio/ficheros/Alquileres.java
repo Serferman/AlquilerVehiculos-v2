@@ -1,23 +1,130 @@
 package org.iesalandalus.programacion.alquilervehiculos.modelo.negocio.ficheros;
 
+import java.io.File;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.OperationNotSupportedException;
+import javax.xml.parsers.DocumentBuilder;
 
 import org.iesalandalus.programacion.alquilervehiculos.modelo.dominio.Alquiler;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.dominio.Cliente;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.dominio.Vehiculo;
 import org.iesalandalus.programacion.alquilervehiculos.modelo.negocio.IAlquileres;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class Alquileres implements IAlquileres {
+
+	private static final File FICHERO_ALQUILERES = new File(
+			String.format("%s%s%s", "datos", File.separator, "alquileres.xml"));
+	private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	private static final String RAIZ = "alquileres";
+	private static final String ALQUILER = "alquiler";
+	private static final String CLIENTE = "cliente";
+	private static final String VEHICULO = "vehiculo";
+	private static final String FECHA_ALQUILER = "fechaAlquiler";
+	private static final String FECHA_DEVOLUCION = "fechaDevolucion";
+
+	private static Alquileres instancia;
 
 	private List<Alquiler> coleccionAlquileres;
 
 	public Alquileres() {
 		coleccionAlquileres = new ArrayList<>();
+	}
+
+	static Alquileres getInstancia() {
+		if (instancia == null) {
+			instancia = new Alquileres();
+		}
+
+		return instancia;
+	}
+
+	@Override
+	public void comenzar() {
+		Document documentoXML = UtilidadesXml.leerXmlDeFichero(FICHERO_ALQUILERES);
+		if (documentoXML != null) {
+			leerDom(documentoXML);
+			System.out.print("AVISO: El documento XML se ha leido correctamente.");
+		} else {
+			System.out.print("ERROR: El documento XML no se ha leido correctamente.");
+		}
+	}
+
+	private void leerDom(Document documentoXml) {
+		NodeList alquileres = documentoXml.getElementsByTagName(ALQUILER);
+		for (int i = 0; i < alquileres.getLength(); i++) {
+			Node alquiler = alquileres.item(i);
+			if (alquiler.getNodeType() == Node.ELEMENT_NODE) {
+				try {
+					insertar(getAlquiler((Element) alquiler));
+				} catch (OperationNotSupportedException | NullPointerException | IllegalArgumentException e) {
+					System.out.printf("ERROR: No se ha podido procesar el alquiler: %d --> %s%n", i, e.getMessage());
+				}
+			}
+		}
+	}
+
+	private Alquiler getAlquiler(Element elemento) throws OperationNotSupportedException {
+		Alquiler alquiler = null;
+
+		Cliente cliente = Cliente.getClienteConDni(elemento.getAttribute(CLIENTE));
+		Vehiculo vehiculo = Vehiculo.getVehiculoConMatricula(elemento.getAttribute(VEHICULO));
+		LocalDate fechaAlquiler = LocalDate.parse(elemento.getAttribute(FECHA_ALQUILER), FORMATO_FECHA);
+		LocalDate fechaDevolucion = LocalDate.parse(elemento.getAttribute(FECHA_DEVOLUCION), FORMATO_FECHA);
+
+		if (Clientes.getInstancia().buscar(cliente) != null) {
+			throw new NullPointerException("ERROR: El cliente no puede ser nulo");
+		}
+
+		if (Vehiculos.getInstancia().buscar(vehiculo) != null) {
+			throw new NullPointerException("ERROR: El vehiculo no puede ser nulo");
+		}
+
+		alquiler = new Alquiler(cliente, vehiculo, fechaAlquiler);
+		alquiler.devolver(fechaDevolucion);
+
+		return alquiler;
+	}
+
+	@Override
+	public void terminar() {
+		UtilidadesXml.escribirXmlAFichero(crearDom(), FICHERO_ALQUILERES);
+	}
+
+	private Document crearDom() {
+		DocumentBuilder constructor = UtilidadesXml.crearConstructorDocumentoXml();
+		Document documentoXml = null;
+		if (constructor != null) {
+			documentoXml = constructor.newDocument();
+			documentoXml.appendChild(documentoXml.createElement(RAIZ));
+			for (Alquiler alquiler : coleccionAlquileres) {
+				Element elementoAlquiler = getElemento(documentoXml, alquiler);
+				documentoXml.getDocumentElement().appendChild(elementoAlquiler);
+			}
+		}
+		return documentoXml;
+	}
+
+	private Element getElemento(Document documentoXml, Alquiler alquiler) {
+		Element elementoAlquiler = documentoXml.createElement(ALQUILER);
+
+		elementoAlquiler.setAttribute(CLIENTE, alquiler.getCliente().getDni());
+		elementoAlquiler.setAttribute(VEHICULO, alquiler.getVehiculo().getMatricula());
+		elementoAlquiler.setAttribute(FECHA_ALQUILER, alquiler.getFechaAlquiler().format(FORMATO_FECHA));
+
+		if (alquiler.getFechaDevolucion() != null) {
+			elementoAlquiler.setAttribute(FECHA_DEVOLUCION, alquiler.getFechaDevolucion().format(FORMATO_FECHA));
+		}
+
+		return elementoAlquiler;
 	}
 
 	public List<Alquiler> get() {
@@ -68,7 +175,7 @@ public class Alquileres implements IAlquileres {
 				if (alquiler.getCliente().equals(cliente)) {
 					throw new OperationNotSupportedException("ERROR: El cliente tiene otro alquiler sin devolver.");
 				} else if (alquiler.getVehiculo().equals(vehiculo)) {
-					throw new OperationNotSupportedException("ERROR: El turismo está actualmente alquilado.");
+					throw new OperationNotSupportedException("ERROR: El vehículo está actualmente alquilado.");
 					// MENSAJE DE ERROR INVALIDO, no es un turismo, es un vehiculo.
 				}
 			} else {
@@ -78,7 +185,7 @@ public class Alquileres implements IAlquileres {
 					throw new OperationNotSupportedException("ERROR: El cliente tiene un alquiler posterior.");
 				} else if ((alquiler.getVehiculo().equals(vehiculo))
 						&& (alquiler.getFechaDevolucion().compareTo(fechaAlquiler) >= 0)) {
-					throw new OperationNotSupportedException("ERROR: El turismo tiene un alquiler posterior.");
+					throw new OperationNotSupportedException("ERROR: El vehículo tiene un alquiler posterior.");
 					// MENSAJE DE ERROR INVALIDO, no es un turismo, es un vehiculo.
 				}
 			}
@@ -156,4 +263,5 @@ public class Alquileres implements IAlquileres {
 		int indice = coleccionAlquileres.indexOf(alquiler);
 		return (indice == -1) ? null : coleccionAlquileres.get(indice);
 	}
+
 }
