@@ -127,12 +127,14 @@ public class Clientes implements IClientes {
 			throw new OperationNotSupportedException("ERROR: No existe ningún cliente con ese DNI.");
 		}
 
+		Cliente clienteBuscado = buscar(cliente);
+		
 		if ((nombre != null) && (!nombre.isBlank())) {
-			buscar(cliente).setNombre(nombre);
+			clienteBuscado.setNombre(nombre);
 		}
 
 		if ((telefono != null) && (!telefono.isBlank())) {
-			buscar(cliente).setTelefono(telefono);
+			clienteBuscado.setTelefono(telefono);
 		}
 
 	}

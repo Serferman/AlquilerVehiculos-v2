@@ -23,9 +23,9 @@ public class Cliente{
 			throw new NullPointerException("ERROR: No es posible copiar un cliente nulo.");
 		}
 
-		setNombre(cliente.getNombre());
-		setDni(cliente.getDni());
-		setTelefono(cliente.getTelefono());
+		this.nombre = cliente.getNombre();
+		this.dni = cliente.getDni();
+		this.telefono = cliente.getTelefono();
 	}
 	
 	public static Cliente getClienteConDni(String dni) {

@@ -11,9 +11,6 @@ public class MainApp {
 		Controlador controlador = new Controlador(new ModeloCascada(FactoriaFuenteDatos.FICHEROS),
 				FactoriaVista.TEXTO.crear());
 		controlador.comenzar();
-		// Comenzar no parará hasta que pulsemos 0 que corresponderá al salir.
-		// Una vez haga eso, se ejecutará terminar.
-		controlador.terminar();
 	}
 
 }
