@@ -25,13 +25,13 @@ public class VistaTexto extends Vista {
 		do {
 			Consola.mostrarMenuAcciones();
 			accion = Consola.elegirAccion();
-			accion.ejecutar(); // Ni idea si es asi
+			accion.ejecutar(); 
 		} while (accion != Accion.SALIR);
 	}
 
 	public void terminar() {
 		getControlador().terminar();
-		System.out.println("AVISO: La vista ha terminado");
+		System.out.printf("%nAVISO: La vista ha terminado%n");
 	}
 
 	public void insertarCliente() {

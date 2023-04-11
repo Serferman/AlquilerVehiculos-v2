@@ -3,6 +3,7 @@ package org.iesalandalus.programacion.alquilervehiculos.modelo.negocio.ficheros;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -52,9 +53,9 @@ public class Alquileres implements IAlquileres {
 		Document documentoXML = UtilidadesXml.leerXmlDeFichero(FICHERO_ALQUILERES);
 		if (documentoXML != null) {
 			leerDom(documentoXML);
-			System.out.print("AVISO: El documento XML se ha leido correctamente.");
+			System.out.println("AVISO: El documento XML de Alquileres se ha leido correctamente.");
 		} else {
-			System.out.print("ERROR: El documento XML no se ha leido correctamente.");
+			System.out.println("ERROR: El documento XML de Alquileres no se ha leido correctamente.");
 		}
 	}
 
@@ -65,30 +66,32 @@ public class Alquileres implements IAlquileres {
 			if (alquiler.getNodeType() == Node.ELEMENT_NODE) {
 				try {
 					insertar(getAlquiler((Element) alquiler));
-				} catch (OperationNotSupportedException | NullPointerException | IllegalArgumentException e) {
-					System.out.printf("ERROR: No se ha podido procesar el alquiler: %d --> %s%n", i, e.getMessage());
+				} catch (DateTimeParseException | OperationNotSupportedException | NullPointerException | IllegalArgumentException e) {
+					System.out.printf("%nERROR: No se ha podido procesar el alquiler: %d --> %s%n", i, e.getMessage());
 				}
 			}
 		}
 	}
 
 	private Alquiler getAlquiler(Element elemento) throws OperationNotSupportedException {
-		Alquiler alquiler = null;
-
 		Cliente cliente = Cliente.getClienteConDni(elemento.getAttribute(CLIENTE));
 		Vehiculo vehiculo = Vehiculo.getVehiculoConMatricula(elemento.getAttribute(VEHICULO));
 		LocalDate fechaAlquiler = LocalDate.parse(elemento.getAttribute(FECHA_ALQUILER), FORMATO_FECHA);
 		LocalDate fechaDevolucion = LocalDate.parse(elemento.getAttribute(FECHA_DEVOLUCION), FORMATO_FECHA);
 
-		if (Clientes.getInstancia().buscar(cliente) != null) {
+		cliente = Clientes.getInstancia().buscar(cliente);
+		vehiculo = Vehiculos.getInstancia().buscar(vehiculo);
+		
+		if ( cliente == null) {
 			throw new NullPointerException("ERROR: El cliente no puede ser nulo");
 		}
 
-		if (Vehiculos.getInstancia().buscar(vehiculo) != null) {
+		
+		if ( vehiculo == null) {
 			throw new NullPointerException("ERROR: El vehiculo no puede ser nulo");
 		}
 
-		alquiler = new Alquiler(cliente, vehiculo, fechaAlquiler);
+		Alquiler alquiler = new Alquiler(cliente, vehiculo, fechaAlquiler);
 		alquiler.devolver(fechaDevolucion);
 
 		return alquiler;

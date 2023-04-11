@@ -44,9 +44,9 @@ public class Clientes implements IClientes {
 		Document documentoXML = UtilidadesXml.leerXmlDeFichero(FICHERO_CLIENTES);
 		if (documentoXML != null) {
 			leerDom(documentoXML);
-			System.out.print("AVISO: El documento XML se ha leido correctamente.");
+			System.out.println("AVISO: El documento XML de Clientes se ha leido correctamente.");
 		} else {
-			System.out.print("ERROR: El documento XML no se ha leido correctamente.");
+			System.out.println("ERROR: El documento XML de Clientes no se ha leido correctamente.");
 		}
 	}
 
@@ -58,11 +58,10 @@ public class Clientes implements IClientes {
 				try {
 					insertar(getCliente((Element) cliente));
 				} catch (OperationNotSupportedException | NullPointerException | IllegalArgumentException e) {
-					System.out.printf("ERROR: No se ha podido procesar el cliente: %d --> %s%n", i, e.getMessage());
+					System.out.printf("%nERROR: No se ha podido procesar el cliente: %d --> %s%n", i, e.getMessage());
 				}
 			}
 		}
-		System.out.println("Fichero de objetos leído correctamente.");
 	}
 
 	private Cliente getCliente(Element elemento) {

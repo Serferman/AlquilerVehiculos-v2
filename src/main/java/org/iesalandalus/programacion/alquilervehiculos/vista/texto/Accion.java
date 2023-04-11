@@ -5,7 +5,7 @@ public enum Accion {
 	SALIR("Salir") {
 		@Override
 		public void ejecutar() {
-			// No debe de hacer nada
+			vista.terminar();
 		}
 	},
 	INSERTAR_CLIENTE("Insertar cliente") {

@@ -54,9 +54,9 @@ public class Vehiculos implements IVehiculos {
 		Document documentoXML = UtilidadesXml.leerXmlDeFichero(FICHERO_VEHICULOS);
 		if (documentoXML != null) {
 			leerDom(documentoXML);
-			System.out.print("AVISO: El documento XML se ha leido correctamente.");
+			System.out.println("AVISO: El documento XML de Vehiculos se ha leido correctamente.");
 		} else {
-			System.out.print("ERROR: El documento XML no se ha leido correctamente.");
+			System.out.println("ERROR: El documento XML de Vehiculos no se ha leido correctamente.");
 		}
 	}
 
@@ -73,8 +73,6 @@ public class Vehiculos implements IVehiculos {
 				}
 			}
 		}
-		System.out.println("Fichero de objetos leído correctamente.");
-
 	}
 
 	private Vehiculo getVehiculo(Element elemento) {
